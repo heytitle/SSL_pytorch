@@ -12,9 +12,18 @@ from models import BarlowTwins
 from trainer import SSL_Trainer
 from utils import SSL_CIFAR10
 
+from datetime import datetime
+
+
+now = datetime.now()
+
+slug = now.strftime("%m-%d-%Y--%H-%M-%S")
+
 # Define hyperparameters
 data_root = "./data"
-save_root = "./results/barlow_twins/"
+save_root = f"./results/barlow_twins/{slug}"
+
+print(f"Saving results at: {save_root}")
 
 dl_kwargs = {"batch_size": 512, "shuffle": True, "num_workers": 2}
 
