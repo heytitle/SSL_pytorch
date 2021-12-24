@@ -24,7 +24,7 @@ ssl_data = SSL_CIFAR10(data_root, "BYOL", dl_kwargs)
 # general training params
 train_params = {
     "save_root": save_root,
-    "num_epochs": 800,
+    "num_epochs": 200,
     "optimizer": SGD,
     "scheduler": CosineAnnealingLR,
     "warmup_epochs": 10,
