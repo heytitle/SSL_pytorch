@@ -35,9 +35,9 @@ class BarlowTwins(nn.Module):
         n, d = z1.shape
         c = torch.mm(z1_norm.T, z2_norm) / n
 
-        c_diff = (c - torch.eye(D, device=device)).pow(2)  # DxD
+        c_diff = (c - torch.eye(d, device=device)).pow(2)  # DxD
         # multiply off-diagonal elems of c_diff by lambda
-        c_diff[~torch.eye(D, dtype=bool)] *= λ
+        c_diff[~torch.eye(d, dtype=bool)] *= λ
 
         return c_diff.sum()
 
