@@ -27,7 +27,7 @@ train_params = {
     "num_epochs": 200,
     "optimizer": SGD,
     "scheduler": CosineAnnealingLR,
-    "warmup_epochs": 10,
+    "warmup_epochs": 0,
     "iter_scheduler": True,
     "evaluate_at": [100, 200, 400, 600],
     "verbose": True,
@@ -38,13 +38,12 @@ train_params = {
 # optim_params = {'lr':0.2 * dl_kwargs['batch_size']/256, 'weight_decay': 1.5e-6,
 #                'exclude_bias_and_norm': True}
 
-# from: https://github.com/IgorSusmelj/barlowtwins/blob/main/main.py
-optim_params = {"lr": 1e-3, "momentum": 0.9, "weight_decay": 5e-4}
+# from: lightly
+optim_params = {"lr": 6e-2, "momentum": 0.9, "weight_decay": 5e-4}
 
 # params of scheduler
 scheduler_params = {
     "T_max": (train_params["num_epochs"] - train_params["warmup_epochs"])
-    * len(ssl_data.train_dl)
 }
 # 'eta_min': 1e-3} in orginal implementation
 
