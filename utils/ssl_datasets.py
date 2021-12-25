@@ -25,7 +25,6 @@ class SSL_CIFAR10(object):
 
         train_eval_transf = transforms.Compose(
             [
-                transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize(*CIFAR10_NORM),
             ]
