@@ -28,7 +28,7 @@ print(f"Saving results at: {save_root}")
 dl_kwargs = {"batch_size": 512, "shuffle": True, "num_workers": 2}
 
 # Define data
-ssl_data = SSL_CIFAR10(data_root, "BYOL", dl_kwargs)
+ssl_data = SSL_CIFAR10(data_root, "SimCLR", dl_kwargs)
 
 # general training params
 train_params = {
