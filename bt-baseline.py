@@ -71,7 +71,7 @@ else:
 makedirs(save_root, exist_ok=True)
 
 # Define Model
-resnet = resnet18(zero_init_residual=True)
+resnet = resnet18()
 barlow_twins = BarlowTwins(resnet, projector_hidden=(2048, 2048, 2048))
 
 # Define Trainer
