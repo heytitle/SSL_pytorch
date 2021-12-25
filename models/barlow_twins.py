@@ -25,7 +25,7 @@ class BarlowTwins(nn.Module):
         self.repre_dim = self.backbone_net.fc.in_features
         backbone_net.fc = nn.Identity()
 
-        self.projector = MLP(self.repre_dim, projector_hidden, bias=False)
+        self.projector = MLP(self.repre_dim, projector_hidden, bias=True)
 
     def loss_fn(self, z1, z2, λ):
         # taken from https://github.com/lightly-ai/lightly/blob/0be5e3b7b4e0b748fe9f2c2e31d2cf6ed3c5f77c/lightly/loss/barlow_twins_loss.py#L42
