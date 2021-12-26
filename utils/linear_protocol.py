@@ -76,12 +76,10 @@ class Linear_Protocoler(object):
         for epoch in range(num_epochs):
             for x, y, _ in dataloader:
                 x, y = x.to(self.device), y.to(self.device)
-                optimizer.zero_grad()
-
                 # forward
                 loss = ce_loss(self.classifier(x), y)
-
                 # backward
+                optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
             if scheduler:
