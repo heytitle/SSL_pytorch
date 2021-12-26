@@ -31,11 +31,12 @@ class SSL_Trainer(object):
         for i, ((x1, x2), _, _) in enumerate(self.data.train_dl):
             x1, x2 = x1.to(self.device), x2.to(self.device)
 
+            self.optimizer.zero_grad()
+
             # Forward pass
             loss = self.model(x1, x2)
 
             # Backward pass
-            self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
 
