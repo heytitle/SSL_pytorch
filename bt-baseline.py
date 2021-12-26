@@ -72,7 +72,9 @@ makedirs(save_root, exist_ok=True)
 
 # Define Model
 resnet = resnet18()
-barlow_twins = BarlowTwins(resnet, projector_hidden=(2048, 2048))
+barlow_twins = BarlowTwins(resnet, projector_hidden=(2048, 2048, 2048))
+
+print(barlow_twins)
 
 # Define Trainer
 cifar10_trainer = SSL_Trainer(barlow_twins, ssl_data, device)
