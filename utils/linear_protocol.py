@@ -13,7 +13,6 @@ class Linear_Protocoler(object):
 
         # Copy net
         self.encoder = deepcopy(encoder)
-        self.encoder.eval()
 
         # Turn off gradients
         for p in self.encoder.parameters():
@@ -24,31 +23,32 @@ class Linear_Protocoler(object):
     def knn_accuracy(self, train_dl, test_dl, knn_k: int = 200, knn_t: float = 0.1):
         # get classes
         num_classes = 10
+        self.encoder.eval()
+        with torch.no_grad():
+            # extract train
+            train_features = ()
+            train_labels = ()
+            for x, labels, _ in train_dl:
+                feats = self.encoder(x.to(self.device))
+                train_features += (F.normalize(feats, dim=1),)
+                train_labels += (labels,)
+            train_features = torch.cat(train_features).t().contiguous()
+            train_labels = torch.cat(train_labels).to(self.device)
 
-        # extract train
-        train_features = ()
-        train_labels = ()
-        for x, labels, _ in train_dl:
-            feats = self.encoder(x.to(self.device))
-            train_features += (F.normalize(feats, dim=1),)
-            train_labels += (labels,)
-        train_features = torch.cat(train_features).t().contiguous()
-        train_labels = torch.cat(train_labels).to(self.device)
+            # Test
+            total_top1, total_num = 0.0, 0
+            for x, target, _ in test_dl:
+                x, target = x.to(self.device), target.to(self.device)
+                features = self.encoder(x)
+                features = F.normalize(features, dim=1)
 
-        # Test
-        total_top1, total_num = 0.0, 0
-        for x, target, _ in test_dl:
-            x, target = x.to(self.device), target.to(self.device)
-            features = self.encoder(x)
-            features = F.normalize(features, dim=1)
+                # Get knn predictions
+                pred_labels = knn_predict(
+                    features, train_features, train_labels, num_classes, knn_k, knn_t
+                )
 
-            # Get knn predictions
-            pred_labels = knn_predict(
-                features, train_features, train_labels, num_classes, knn_k, knn_t
-            )
-
-            total_num += x.size(0)
-            total_top1 += (pred_labels[:, 0] == target).float().sum().item()
+                total_num += x.size(0)
+                total_top1 += (pred_labels[:, 0] == target).float().sum().item()
 
         return total_top1 / total_num * 100
 
