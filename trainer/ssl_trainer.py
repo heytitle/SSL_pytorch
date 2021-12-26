@@ -54,9 +54,10 @@ class SSL_Trainer(object):
         self.eval_acc["knn"].append(
             evaluator.knn_accuracy(self.data.train_eval_dl, self.data.test_dl)
         )
-        # linear protocol
-        evaluator.train(self.data.train_eval_dl, num_epochs, lr, milestones)
-        self.eval_acc["lin"].append(evaluator.linear_accuracy(self.data.test_dl))
+        # # linear protocol
+        # evaluator.train(self.data.train_eval_dl, num_epochs, lr, milestones)
+        # self.eval_acc["lin"].append(evaluator.linear_accuracy(self.data.test_dl))
+        self.eval_acc["lin"].append(-1)
 
     def train(
         self,
