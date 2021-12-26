@@ -1,9 +1,12 @@
+import torch
+
 from torch.utils.data import DataLoader
 
-from torchvision import transforms
+from torchvision import transforms as T
 from torchvision.datasets import CIFAR10
 
 from augmentation import *
+import lightly
 
 
 class SSL_CIFAR10(object):
@@ -11,41 +14,59 @@ class SSL_CIFAR10(object):
         # Cifar10 Mean and Std
         CIFAR10_NORM = [[0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]]
 
-        # Define Augmentations
-        if augmentation == "BYOL":
-            train_transf = BYOL_augmentaions(image_size=32, normalize=CIFAR10_NORM)
-        elif augmentation == "SimSiam":
-            train_transf = SimSiam_augmentaions(image_size=32, normalize=CIFAR10_NORM)
-        elif augmentation == "VICReg":
-            train_transf = VICReg_augmentaions(image_size=32, normalize=CIFAR10_NORM)
-        elif augmentation == "SimCLR":
-            train_transf = SimCLR_augmentaions(image_size=32, normalize=CIFAR10_NORM)
-        else:
-            raise ValueError(f"`{augmentation}` not exist!")
+        collate_fn = lightly.data.SimCLRCollateFunction(
+            input_size=32,
+            gaussian_blur=0.0,
+        )
 
-        train_eval_transf = transforms.Compose(
+        test_transforms = T.Compose(
             [
-                transforms.ToTensor(),
-                transforms.Normalize(*CIFAR10_NORM),
+                T.ToTensor(),
+                T.Normalize(
+                    mean=CIFAR10_NORM[0],
+                    std=CIFAR10_NORM[1],
+                ),
             ]
         )
 
-        test_transf = transforms.Compose(
-            [transforms.ToTensor(), transforms.Normalize(*CIFAR10_NORM)]
+        tv_ds_train_ssl = CIFAR10(data_root)
+        tv_ds_train_knn = CIFAR10(data_root, download=True)
+        tv_ds_test = CIFAR10(data_root, download=True, train=False)
+
+        dataset_train_ssl = lightly.data.LightlyDataset.from_torch_dataset(
+            tv_ds_train_ssl
+        )
+        dataset_train_eval = lightly.data.LightlyDataset.from_torch_dataset(
+            tv_ds_train_knn, transform=test_transforms
+        )
+        dataset_test = lightly.data.LightlyDataset.from_torch_dataset(
+            tv_ds_test, transform=test_transforms
         )
 
-        # Define Datasets
-        train_ds = CIFAR10(
-            root=data_root, train=True, download=True, transform=train_transf
-        )
-        train_eval_ds = CIFAR10(
-            root=data_root, train=True, transform=train_eval_transf, download=True
-        )
-        test_ds = CIFAR10(
-            root=data_root, train=False, transform=test_transf, download=True
+        batch_size = 512
+        num_workers = 2
+
+        self.train_dl = torch.utils.data.DataLoader(
+            dataset_train_ssl,
+            batch_size=batch_size,
+            shuffle=True,
+            collate_fn=collate_fn,
+            drop_last=True,
+            num_workers=num_workers,
         )
 
-        # Define Dataloaders
-        self.train_dl = DataLoader(train_ds, drop_last=True, **dl_kwargs)
-        self.train_eval_dl = DataLoader(train_eval_ds, drop_last=False, **dl_kwargs)
-        self.test_dl = DataLoader(test_ds, drop_last=False, **dl_kwargs)
+        self.train_eval_dl = torch.utils.data.DataLoader(
+            dataset_train_eval,
+            batch_size=batch_size,
+            shuffle=False,
+            drop_last=False,
+            num_workers=num_workers,
+        )
+
+        self.test_dl = torch.utils.data.DataLoader(
+            dataset_test,
+            batch_size=batch_size,
+            shuffle=False,
+            drop_last=False,
+            num_workers=num_workers,
+        )

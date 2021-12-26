@@ -28,7 +28,7 @@ class SSL_Trainer(object):
         self.data = ssl_data
 
     def train_epoch(self, epoch_id):
-        for i, ((x1, x2), _) in enumerate(self.data.train_dl):
+        for i, ((x1, x2), _, _) in enumerate(self.data.train_dl):
             x1, x2 = x1.to(self.device), x2.to(self.device)
 
             # Forward pass
@@ -38,14 +38,6 @@ class SSL_Trainer(object):
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-
-            # Update momentum encoder
-            if self.use_momentum:
-                # get τ
-                tau = self.model.get_tau(
-                    1 + i + self._train_len * epoch_id, self._total_iters
-                )
-                self.model.update_moving_average(tau)
 
             # save learning rate
             self._hist_lr.append(self.scheduler.get_last_lr())
@@ -118,17 +110,7 @@ class SSL_Trainer(object):
 
             self.train_epoch(epoch)
 
-            if self.scheduler and not self._iter_scheduler:
-                # Scheduler only every epoch
-                self.scheduler.step()
-
-            # Switch to new schedule after warmup period
-            if warmup_epochs and epoch + 1 == warmup_epochs:
-                if scheduler:
-                    self.scheduler = scheduler(self.optimizer, **scheduler_params)
-                    self._iter_scheduler = iter_scheduler
-                else:  # scheduler = None
-                    self.scheduler = scheduler
+            self.scheduler.step()
 
             # Log
             self.loss_hist.append(self._epoch_loss / self._train_len)
