@@ -13,6 +13,8 @@ class Linear_Protocoler(object):
 
         # Copy net
         self.encoder = deepcopy(encoder)
+        self.encoder.eval()
+
         # Turn off gradients
         for p in self.encoder.parameters():
             p.requires_grad = False
