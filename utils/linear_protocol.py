@@ -26,7 +26,7 @@ class Linear_Protocoler(object):
         # extract train
         train_features = ()
         train_labels = ()
-        for x, labels in train_dl:
+        for x, labels, _ in train_dl:
             feats = self.encoder(x.to(self.device))
             train_features += (F.normalize(feats, dim=1),)
             train_labels += (labels,)
@@ -35,7 +35,7 @@ class Linear_Protocoler(object):
 
         # Test
         total_top1, total_num = 0.0, 0
-        for x, target in test_dl:
+        for x, target, _ in test_dl:
             x, target = x.to(self.device), target.to(self.device)
             features = self.encoder(x)
             features = F.normalize(features, dim=1)
@@ -52,7 +52,7 @@ class Linear_Protocoler(object):
 
     def train(self, dataloader, num_epochs, lr, milestones=None):
         # get classes
-        num_classes = len(dataloader.dataset.classes)
+        num_classes = 10
 
         # Add classification layer
         self.classifier = nn.Sequential(
@@ -74,7 +74,7 @@ class Linear_Protocoler(object):
 
         # Train
         for epoch in range(num_epochs):
-            for x, y in dataloader:
+            for x, y, _ in dataloader:
                 x, y = x.to(self.device), y.to(self.device)
                 # forward
                 loss = ce_loss(self.classifier(x), y)
@@ -90,7 +90,7 @@ class Linear_Protocoler(object):
         # since we're not training, we don't need to calculate the gradients for our outputs
         with torch.no_grad():
             self.classifier.eval()
-            for x, y in dataloader:
+            for x, y, _ in dataloader:
                 x, y = x.to(self.device), y.to(self.device)
                 # calculate outputs by running images through the network
                 outputs = self.classifier(x)
