@@ -38,7 +38,7 @@ train_params = {
     "scheduler": CosineAnnealingLR,
     "warmup_epochs": 0,
     "iter_scheduler": True,
-    "evaluate_at": [100, 200, 400, 600],
+    "evaluate_at": [200],
     "verbose": True,
 }
 
