@@ -43,7 +43,7 @@ class SSL_CIFAR10(object):
             tv_ds_test, transform=test_transforms
         )
 
-        batch_size = 512
+        batch_size = 128
         num_workers = 2
 
         self.train_dl = torch.utils.data.DataLoader(
