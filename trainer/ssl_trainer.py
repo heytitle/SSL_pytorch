@@ -74,6 +74,8 @@ class SSL_Trainer(object):
         verbose=True,
     ):
 
+        self._train_len = len(self.data.train_dl)
+
         # Define Optimizer
         self.optimizer = torch.optim.SGD(
             self.model.parameters(),
@@ -86,7 +88,7 @@ class SSL_Trainer(object):
         )
 
         # Run Training
-        for epoch in range(num_epochs):
+        for epoch in range(epoch_start, num_epochs):
             self._epoch_loss = 0
             start_time = time.time()
 
