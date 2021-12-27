@@ -72,7 +72,7 @@ makedirs(save_root, exist_ok=True)
 
 # Define Model
 resnet = resnet18()
-barlow_twins = BarlowTwins(resnet, projector_hidden=(2048, 2048, 2048))
+barlow_twins = BarlowTwins(resnet, projector_hidden=(2048, 2048))
 
 print(barlow_twins)
 
