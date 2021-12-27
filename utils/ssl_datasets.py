@@ -23,8 +23,8 @@ class SSL_CIFAR10(object):
             [
                 T.ToTensor(),
                 T.Normalize(
-                    mean=CIFAR10_NORM[0],
-                    std=CIFAR10_NORM[1],
+                    mean=IMAGENET_NORM[0],
+                    std=IMAGENET_NORM[1],
                 ),
             ]
         )
