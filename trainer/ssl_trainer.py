@@ -86,7 +86,7 @@ class SSL_Trainer(object):
         )
 
         # Run Training
-        for epoch in range(epoch_start, num_epochs):
+        for epoch in range(num_epochs):
             self._epoch_loss = 0
             start_time = time.time()
 
