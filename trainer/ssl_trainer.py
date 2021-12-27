@@ -28,6 +28,7 @@ class SSL_Trainer(object):
         self.data = ssl_data
 
     def train_epoch(self, epoch_id):
+        self.model.train()
         for i, ((x1, x2), _, _) in enumerate(self.data.train_dl):
             x1, x2 = x1.to(self.device), x2.to(self.device)
 
@@ -46,6 +47,7 @@ class SSL_Trainer(object):
             self._epoch_loss += loss.item()
 
     def evaluate(self, num_epochs, lr, milestones=None):
+        self.model.eval()
         # Linear protocol
         evaluator = Linear_Protocoler(
             self.model.backbone_net, repre_dim=self.model.repre_dim, device=self.device
