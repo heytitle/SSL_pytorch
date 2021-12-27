@@ -5,6 +5,8 @@ import torch.nn as nn
 
 from .utils import MLP
 
+from lightly.models.modules.heads import ProjectionHead
+
 
 class BarlowTwins(nn.Module):
     """
@@ -23,9 +25,14 @@ class BarlowTwins(nn.Module):
 
         self.backbone_net = backbone_net
         self.repre_dim = self.backbone_net.fc.in_features
-        backbone_net.fc = nn.Identity()
+        backbone_net.fc = nn.Flatten()
 
-        self.projector = MLP(self.repre_dim, projector_hidden, bias=True)
+        self.projector = ProjectionHead(
+            [
+                (512, 2048, nn.BatchNorm1d(2048), nn.ReLU(inplace=True)),
+                (2048, 2048, None, None),
+            ]
+        )
 
     def loss_fn(self, z1, z2, λ):
         # taken from https://github.com/lightly-ai/lightly/blob/0be5e3b7b4e0b748fe9f2c2e31d2cf6ed3c5f77c/lightly/loss/barlow_twins_loss.py#L42
