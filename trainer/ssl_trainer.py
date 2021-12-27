@@ -31,11 +31,11 @@ class SSL_Trainer(object):
         for i, ((x1, x2), _, _) in enumerate(self.data.train_dl):
             x1, x2 = x1.to(self.device), x2.to(self.device)
 
+            self.optimizer.zero_grad()
+
             # Forward pass
             loss = self.model(x1, x2)
 
-            # Backward pass
-            self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
 
@@ -74,35 +74,16 @@ class SSL_Trainer(object):
         verbose=True,
     ):
 
-        # Check and Load existing model
-        epoch_start, optim_state, sched_state = self.load_model(
-            save_root, return_vals=True
-        )
-
-        # Extract training length
-        self._train_len = len(self.data.train_dl)
-        self._total_iters = num_epochs * self._train_len
-
         # Define Optimizer
-        self.optimizer = optimizer(self.model.parameters(), **optim_params)
-        if optim_state:
-            self.optimizer.load_state_dict(optim_state)
-
-        # Define Scheduler
-        if warmup_epochs and epoch_start < warmup_epochs:
-            self.scheduler = lr_scheduler.LambdaLR(
-                self.optimizer, lambda it: (it + 1) / (warmup_epochs * self._train_len)
-            )
-            self._iter_scheduler = True
-        else:
-            if scheduler:
-                self.scheduler = scheduler(self.optimizer, **scheduler_params)
-                self._iter_scheduler = iter_scheduler
-            else:  # scheduler = None
-                self.scheduler = scheduler
-        # Load existing scheduler
-        if self.scheduler and sched_state:
-            self.scheduler.load_state_dict(sched_state)
+        self.optimizer = torch.optim.SGD(
+            self.model.parameters(),
+            lr=6e-2,
+            momentum=0.9,
+            weight_decay=5e-4,
+        )
+        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            self.optimizer, num_epochs
+        )
 
         # Run Training
         for epoch in range(epoch_start, num_epochs):
@@ -119,17 +100,6 @@ class SSL_Trainer(object):
                 print(
                     f"Epoch: {epoch}, Loss: {self.loss_hist[-1]}, Time epoch: {time.time() - start_time}"
                 )
-
-            # Run evaluation
-            if (epoch + 1) in evaluate_at:
-                self.evaluate(**eval_params)
-                # print
-                print(
-                    f'Accuracy after epoch {epoch}: KNN:{self.eval_acc["knn"][-1]}, Linear: {self.eval_acc["lin"][-1]}'
-                )
-
-                # Save model
-                self.save_model(save_root, epoch)
 
         # Evaluate after Training
         self.evaluate(**eval_params)
